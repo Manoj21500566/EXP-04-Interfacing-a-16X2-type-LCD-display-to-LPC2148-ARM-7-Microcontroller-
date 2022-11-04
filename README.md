@@ -1,13 +1,8 @@
 # EXP-04-Interfacing a 16X2 type LCD display to LPC2148 ARM 7Microcontroller
 
-Name :
+Name :ManojM
 
-Roll no :
-
-Date of experiment :
-
- 
-
+Roll no :212221240027
 
 ## Interfacing a 16X2 type LCD display to LPC2148 ARM 7 Microcontroller 
 
@@ -122,17 +117,94 @@ Step 9: Select the hex file from the Kiel program folder and import the program 
 
 
 ## Kiel - Program  
+~~~
+#include <lpc214x.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+void delay_ms(uint16_t j) /* Function for delay in milliseconds  */
+{
+    uint16_t x,i;
+	for(i=0;i<j;i++)
+	{
+    for(x=0; x<6000; x++);    /* loop to generate 1 millisecond delay with Cclk = 60MHz */
+	}
+}
+
+void LCD_CMD(char command)
+{
+	IO0PIN = ( (IO0PIN & 0xFFFF00FF) | (command<<8) );
+	IO0SET = 0x00000040; /* EN = 1 */
+	IO0CLR = 0x00000030; /* RS = 0, RW = 0 */
+	delay_ms(2);
+	IO0CLR = 0x00000040; /* EN = 0, RS and RW unchanged(i.e. RS = RW = 0) */
+	delay_ms(5);
+}
+
+void LCD_INIT(void)
+{
+	IO0DIR = 0x0000FFF0; /* P0.8 to P0.15 LCD Data. P0.4,5,6 as RS RW and EN */
+	delay_ms(20);
+	LCD_CMD(0x38);  /* Initialize lcd */
+	LCD_CMD(0x0C);   /* Display on cursor off */
+	LCD_CMD(0x06);  /* Auto increment cursor */
+	LCD_CMD(0x01);   /* Display clear */
+	LCD_CMD(0x80);  /* First line first position */
+}
+
+void LCD_STRING (char* msg)
+{
+	uint8_t i=0;
+	while(msg[i]!=0)
+	{
+		IO0PIN = ( (IO0PIN & 0xFFFF00FF) | (msg[i]<<8) );
+		IO0SET = 0x00000050; /* RS = 1, , EN = 1 */
+		IO0CLR = 0x00000020; /* RW = 0 */
+		delay_ms(2);
+		IO0CLR = 0x00000040; /* EN = 0, RS and RW unchanged(i.e. RS = 1, RW = 0) */
+		delay_ms(5);
+		i++;
+	}
+}
+
+void LCD_CHAR (char msg)
+{
+		IO0PIN = ( (IO0PIN & 0xFFFF00FF) | (msg<<8) );
+		IO0SET = 0x00000050; /* RS = 1, , EN = 1 */
+		IO0CLR = 0x00000020; /* RW = 0 */
+		delay_ms(2);
+		IO0CLR = 0x00000040; /* EN = 0, RS and RW unchanged(i.e. RS = 1, RW = 0) */
+		delay_ms(5);
+}
+
+int main(void)
+{
+
+	LCD_INIT();
+	LCD_STRING("212221230083");//first line
+	LCD_CMD(0xC0);
+	LCD_STRING("RITHIGA SRI.B");//second line
+
+	return 0;
+}
+~~~
 
 
 
 
 
-## Proteus simulation 
+## Proteus simulation :
+![1](https://user-images.githubusercontent.com/94588708/199890697-496e2168-49aa-4fa7-9f76-f139b570b469.png)
+
+![2](https://user-images.githubusercontent.com/94588708/199890902-8625613c-6aef-4e63-8082-2abfa056ec7e.png)
 
 
 
 
 ##  layout Diagram 
+![3](https://user-images.githubusercontent.com/94588708/199891002-37bfe1bf-c61e-47b1-b7f0-7bffe2bf91ae.png)
+
 
 
 
